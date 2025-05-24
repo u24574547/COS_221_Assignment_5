@@ -39,8 +39,10 @@ function login() {
         "email": email,
         "password": password
     }, function (data) {
-        console.log(data.message);
-
+      if(isset(data.success)){
+        console.log(data.data.api_key);
+        localStorage.setItem("api_key",data.data.api_key);
+      }
     });
 }
 
