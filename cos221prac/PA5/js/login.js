@@ -40,6 +40,7 @@ function login() {
         "password": password
     }, function (data) {
         console.log(data.message);
+
     });
 }
 

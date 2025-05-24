@@ -44,8 +44,8 @@ $site_description = "The best deals on the Internet!";
         </li>
         <li><a href="index.php?page=about" <?php echo ($page == 'about') ? 'class="active"' : ''; ?>>About</a></li>
         <li><a href="index.php?page=contact" <?php echo ($page == 'contact') ? 'class="active"' : ''; ?>>Contact</a></li>
-        <li><a href='index.php?page=register' <?php echo ($page == 'register') ? 'class="active"' : ''; ?>>Register</a>
-        <li><a href='index.php?page=login' <?php echo ($page == 'login') ? 'class="active"' : ''; ?>>Login</a>
+        <li <?php echo ($logged_in===true) ? 'style="display:none;"' : 'error with logging in'; ?>><a href='index.php?page=register' <?php echo ($page == 'register') ? 'class="active"' : ''; ?>>Register</a>
+        <li <?php echo ($logged_in===true) ? 'style="display:none;"' : 'error with logging in'; ?>><a href='index.php?page=login' <?php echo ($page == 'login') ? 'class="active"' : ''; ?>>Login</a>
         </li>
       </ul>
     </nav>
