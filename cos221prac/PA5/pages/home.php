@@ -120,7 +120,7 @@ $top_stores = [
   ],
 ];
 ?>
-
+<script type='text/javascript' src='js/home.js'></script>
 <section class="hero">
   <div class="hero-content">
     <h1>Find the Best Deals Across the Web</h1>
@@ -153,7 +153,7 @@ $top_stores = [
           <h3><a href=""><?php echo $product['name']; ?></a></h3>
           <div class="price-range">
             <span>Price Range:</span>
-            <strong><?php echo /*formatPrice(*/$product['lowest_price']/*)*/; ?> - <?php echo /*formatPrice(*/$product['highest_price']/*)*/; ?></strong>
+            <strong><?php echo $product['lowest_price']; ?> - <?php echo $product['highest_price']; ?></strong>
           </div>
           <div class="store-count">
             <i class="fas fa-store"></i> Available at <?php echo $product['stores']; ?> stores
