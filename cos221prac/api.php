@@ -171,6 +171,8 @@ class API
                     $resultA = $stmt->get_result();
                     if ($resultA->num_rows !== 0) {
                         return $this->response(true, ['isAdmin' => true]);
+                    } else {
+                        return $this->response(true, ['isAdmin' => false]);
                     }
                 }
             }
@@ -180,7 +182,7 @@ class API
         }
     }
 
-    public function getProducts($data) //curl -X POST http://localhost/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\"}"
+    public function getProducts($data) //curl -X POST http://localhost/COS_221_Assignment_5/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\"}"
     {
         $stmt = $this->conn->prepare("SELECT * FROM `products` WHERE 1 LIMIT ?");
         $stmt->bind_param("i", $data->limit);
