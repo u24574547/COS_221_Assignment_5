@@ -25,14 +25,11 @@
         <label for='email'> Email:</label><br>
         <input type='text' id='email' name='email' required><br><br>
 
-        <label for='password'> Password:</label><br>
-        <input type='password' id='password' name='password' required><br><br>
-
         <label for='userType'> User type:</label><br>
         <select name='userType' id="userType">
           <option value='user'>User</option>
           <option value='admin'>Admin</option>
-        </select><br>
+        </select><br><br>
 
         <input type='button' value='Save Edits' onclick='editUserDetails()'>
       </form>
