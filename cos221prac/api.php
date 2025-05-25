@@ -213,6 +213,9 @@ if (isset($data->type)) {
         case "login":
             echo $instance->login($data);
             break;
+        case "verifyAdmin":
+            echo $instance->verifyAdmin($data);
+            break;
         case "getProducts":
             echo $instance->getProducts($data);
             break;
