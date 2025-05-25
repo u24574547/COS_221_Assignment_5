@@ -1,4 +1,4 @@
-const API = "http://localhost/COS%20221/Assignment%205/COS_221_Assignment_5/cos221prac/api.php";
+const API = "../api.php";
 
 function fetchProducts() {
    var xhr = new XMLHttpRequest();
@@ -21,7 +21,7 @@ function fetchProducts() {
     const requestBody = JSON.stringify(
         {
             type : "getProducts",
-            limit: 999
+            limit: 50
         }
     );
     xhr.send(requestBody);
