@@ -93,7 +93,36 @@ class API
         $password = password_hash($data->password, PASSWORD_DEFAULT);
 
         if ($stmt->execute()) {
-            return $this->response(true, ["api_key" => $api_key]);
+            $stmtC = $this->conn->prepare("
+            INSERT INTO `customer`(`user_id`, `customer_id`, `num_purchases`, `total_spent`) 
+            VALUES (?,?,0,0)
+            ");
+            $stmtC->bind_param(
+                'ii',
+                $user_id,
+                $customer_id,
+            );
+
+            $user_id = -1;
+            $stmtU = $this->conn->prepare("
+            SELECT user_id FROM `user` WHERE 1 AND api_key = ?
+            ");
+            $stmtU->bind_param('s', $api_key);
+            if ($stmtU->execute()) {
+                $result = $stmtU->get_result();
+                if ($result->num_rows !== 0) {
+                    $row = $result->fetch_assoc();
+                    $user_id = $row['user_id'];
+                }
+            }
+
+            $customer_id = $user_id;
+
+            if ($user_id !== -1 && $stmtC->execute()) {
+                return $this->response(true, ["api_key" => $api_key]);
+            }
+
+            return $this->response(false, ["api_key" => $api_key, 'message' => 'added user but failed to add customer']);
         } else {
             return $this->response(false, $stmt->error, ["timestamp" => (int)(microtime(true) * 1000)]);
         }
@@ -121,25 +150,70 @@ class API
         }
     }
 
-    public function getProducts($data) //curl -X POST http://localhost/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\"}"
+    public function verifyAdmin($data) //accepts either email or api_key, returns json object with {success: true, data: {isAdmin: true/false}}
     {
-        $stmt = $this->conn->prepare("SELECT * FROM `products` WHERE 1 LIMIT ?");
-        $stmt->bind_param("i", $data->limit);
+        if (isset($data->email)) {
+            $stmt = $this->conn->prepare("SELECT user_id FROM user WHERE email = ?");
+            $stmt->bind_param("s", $data->email);
+        } else if (isset($data->api_key)) {
+            $stmt = $this->conn->prepare("SELECT user_id FROM user WHERE api_key = ?");
+            $stmt->bind_param("s", $data->api_key);
+        }
 
         if ($stmt->execute()) {
             $result = $stmt->get_result();
-            $products = [];
+            if ($result->num_rows !== 0) {
+                $row = $result->fetch_assoc();
 
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    array_push($products, $row);
+                $stmtA = $this->conn->prepare("SELECT * FROM `admin` WHERE 1 AND user_id = ?"); //user is admin if user_id is in admin table
+                $stmtA->bind_param("s", $row['user_id']);
+                if ($stmt->execute()) {
+                    $resultA = $stmt->get_result();
+                    if ($resultA->num_rows !== 0) {
+                        return $this->response(true, ['isAdmin' => true]);
+                    } else {
+                        return $this->response(true, ['isAdmin' => false]);
+                    }
                 }
-                return $this->response(true, ['products' => $products]);
             }
-
-            return $this->response(false, 'no products found');
+            return $this->response(false, 'email not found');
         } else {
             return $this->response(false, $stmt->error);
+        }
+    }
+
+    public function getProducts($data) //curl -X POST http://localhost/COS_221_Assignment_5/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\"}"
+    {
+        $query = "SELECT * FROM `products` WHERE 1";
+
+        // WHERE
+        if (isset($data->search)) {
+            $properties = get_object_vars($data->search);
+            foreach ($properties as $name => $value) {
+                if ($name !== "price_min" && $name !== "price_max") {
+                    if (isset($data->fuzzy) && $data->fuzzy === true)
+                        $query .= " and " . $name . " REGEXP '" . $value . "'";
+                    else
+                        $query .= " and " . $name . " = '" . $value . "'";
+                }
+            }
+        }
+
+        // LIMIT
+        if (isset($data->limit) && is_numeric($data->limit)) {
+            $query .= " LIMIT " . (int)$data->limit;
+        }
+
+        $result = $this->conn->query($query);
+
+        if ($result) {
+            $productsArr = [];
+            while ($row = $result->fetch_assoc()) {
+                array_push($productsArr, $row);
+            }
+            return $this->response(true, ['products' => $productsArr]);;
+        } else {
+            return $this->response(false, 'failed to retrieve products');;
         }
     }
 }
@@ -153,6 +227,9 @@ if (isset($data->type)) {
             break;
         case "login":
             echo $instance->login($data);
+            break;
+        case "verifyAdmin":
+            echo $instance->verifyAdmin($data);
             break;
         case "getProducts":
             echo $instance->getProducts($data);
