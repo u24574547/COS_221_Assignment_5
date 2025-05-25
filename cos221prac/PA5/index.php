@@ -37,6 +37,9 @@ switch ($page) {
   case 'admin':
     include 'pages/admin.php';
     break;
+  case 'viewall':
+    include 'pages/viewall.php';
+    break;
   default:
     include 'pages/404.php';
 }

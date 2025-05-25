@@ -138,7 +138,7 @@ $top_stores = [
 <section class="featured-products">
   <div class="section-header">
     <h2>Featured Products</h2>
-    <a href="" class="view-all">View All</a>
+    <a href="?page=viewall" class="view-all">View All</a>
   </div>
   <div class="product-grid">
     <?php foreach ($featured_products as $product): ?>
