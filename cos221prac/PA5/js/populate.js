@@ -11,12 +11,12 @@ function fetchProducts() {
                 var response = JSON.parse(xhr.responseText);
                     let data = response.data.products;
                     populateHTML(data);
-               
+
             } catch(e) {
                 console.error ("Failed to parse" +  JSON.parse(xhr.responseText));
             }
         }
-    } 
+    }
 
     const requestBody = JSON.stringify(
         {
