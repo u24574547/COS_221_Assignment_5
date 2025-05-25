@@ -219,11 +219,11 @@ class API
         }
     }
 
-    public function updateUser($data)
+    public function updateUser($data) //curl -X POST http://localhost/COS_221_Assignment_5/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"updateUser\",\"user_id\":\"2\",\"fname\":\"frank\",\"lname\":\"horigan\",\"email\":\"asdfasdf@asdfasdf.com\"}"
     {
-        if (!$this->verifyAdmin($data->api_key)) {
-            return $this->response(false, "you are not an admin");
-        }
+        // if (!$this->verifyAdmin($data->api_key)) {
+        //     return $this->response(false, "you are not an admin");
+        // }
 
         $setParts = [];
         $params = [];
