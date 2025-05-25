@@ -93,7 +93,36 @@ class API
         $password = password_hash($data->password, PASSWORD_DEFAULT);
 
         if ($stmt->execute()) {
-            return $this->response(true, ["api_key" => $api_key]);
+            $stmtC = $this->conn->prepare("
+            INSERT INTO `customer`(`user_id`, `customer_id`, `num_purchases`, `total_spent`) 
+            VALUES (?,?,0,0)
+            ");
+            $stmtC->bind_param(
+                'ii',
+                $user_id,
+                $customer_id,
+            );
+
+            $user_id = -1;
+            $stmtU = $this->conn->prepare("
+            SELECT user_id FROM `user` WHERE 1 AND api_key = ?
+            ");
+            $stmtU->bind_param('s', $api_key);
+            if ($stmtU->execute()) {
+                $result = $stmtU->get_result();
+                if ($result->num_rows !== 0) {
+                    $row = $result->fetch_assoc();
+                    $user_id = $row['user_id'];
+                }
+            }
+
+            $customer_id = $user_id;
+
+            if ($user_id !== -1 && $stmtC->execute()) {
+                return $this->response(true, ["api_key" => $api_key]);
+            }
+            
+            return $this->response(false, ["api_key" => $api_key, 'message' => 'added user but failed to add customer']);
         } else {
             return $this->response(false, $stmt->error, ["timestamp" => (int)(microtime(true) * 1000)]);
         }
