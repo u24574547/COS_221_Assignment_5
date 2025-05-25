@@ -165,7 +165,7 @@ class API
             if ($result->num_rows !== 0) {
                 $row = $result->fetch_assoc();
 
-                $stmtA = $this->conn->prepare("SELECT * FROM `admin` WHERE 1 WHERE user_id = ?"); //user is admin if user_id is in admin table
+                $stmtA = $this->conn->prepare("SELECT * FROM `admin` WHERE 1 AND user_id = ?"); //user is admin if user_id is in admin table
                 $stmtA->bind_param("s", $row['user_id']);
                 if ($stmt->execute()) {
                     $resultA = $stmt->get_result();
