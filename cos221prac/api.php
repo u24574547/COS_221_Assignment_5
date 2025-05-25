@@ -121,7 +121,7 @@ class API
             if ($user_id !== -1 && $stmtC->execute()) {
                 return $this->response(true, ["api_key" => $api_key]);
             }
-            
+
             return $this->response(false, ["api_key" => $api_key, 'message' => 'added user but failed to add customer']);
         } else {
             return $this->response(false, $stmt->error, ["timestamp" => (int)(microtime(true) * 1000)]);
@@ -147,6 +147,36 @@ class API
             return $this->response(false, 'email not found');
         } else {
             return $this->response(false, $stmtEmail->error);
+        }
+    }
+
+    public function verifyAdmin($data) //accepts either email or api_key, returns json object with {success: true, data: {isAdmin: true/false}}
+    {
+        if (isset($data->email)) {
+            $stmt = $this->conn->prepare("SELECT user_id FROM user WHERE email = ?");
+            $stmt->bind_param("s", $data->email);
+        } else if (isset($data->api_key)) {
+            $stmt = $this->conn->prepare("SELECT user_id FROM user WHERE api_key = ?");
+            $stmt->bind_param("s", $data->api_key);
+        }
+
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            if ($result->num_rows !== 0) {
+                $row = $result->fetch_assoc();
+
+                $stmtA = $this->conn->prepare("SELECT * FROM `admin` WHERE 1 WHERE user_id = ?"); //user is admin if user_id is in admin table
+                $stmtA->bind_param("s", $row['user_id']);
+                if ($stmt->execute()) {
+                    $resultA = $stmt->get_result();
+                    if ($resultA->num_rows !== 0) {
+                        return $this->response(true, ['isAdmin' => true]);
+                    }
+                }
+            }
+            return $this->response(false, 'email not found');
+        } else {
+            return $this->response(false, $stmt->error);
         }
     }
 
