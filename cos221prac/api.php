@@ -184,23 +184,36 @@ class API
 
     public function getProducts($data) //curl -X POST http://localhost/COS_221_Assignment_5/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\"}"
     {
-        $stmt = $this->conn->prepare("SELECT * FROM `products` WHERE 1 LIMIT ?");
-        $stmt->bind_param("i", $data->limit);
+        $query = "SELECT * FROM `products` WHERE 1";
 
-        if ($stmt->execute()) {
-            $result = $stmt->get_result();
-            $products = [];
-
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    array_push($products, $row);
+        // WHERE
+        if (isset($data->search)) {
+            $properties = get_object_vars($data->search);
+            foreach ($properties as $name => $value) {
+                if ($name !== "price_min" && $name !== "price_max") {
+                    if (isset($data->fuzzy) && $data->fuzzy === true)
+                        $query .= " and " . $name . " REGEXP '" . $value . "'";
+                    else
+                        $query .= " and " . $name . " = '" . $value . "'";
                 }
-                return $this->response(true, ['products' => $products]);
             }
+        }
 
-            return $this->response(false, 'no products found');
+        // LIMIT
+        if (isset($data->limit) && is_numeric($data->limit)) {
+            $query .= " LIMIT " . (int)$data->limit;
+        }
+
+        $result = $this->conn->query($query);
+
+        if ($result) {
+            $productsArr = [];
+            while ($row = $result->fetch_assoc()) {
+                array_push($productsArr, $row);
+            }
+            return $this->response(true, ['products' => $productsArr]);;
         } else {
-            return $this->response(false, $stmt->error);
+            return $this->response(false, 'failed to retrieve products');;
         }
     }
 }
