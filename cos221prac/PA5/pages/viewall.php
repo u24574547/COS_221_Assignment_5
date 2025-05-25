@@ -2,7 +2,16 @@
 <section class="featured-products">
   <div class="section-header">
     <h2>All Products</h2>
-    <!-- You can add a filter or sort button here if needed -->
+    <div class="product-filters">
+      <label for="category-filter">Filter by Category:</label>
+      <select id="category-filter">
+      <option value="all">All</option>
+      <option value="electronics">Electronics</option>
+      <option value="clothing">Clothing</option>
+      <option value="books">Books</option>
+      <!-- Add categories dynamically?-->
+      </select>
+    </div>
   </div>
   <div class="product-grid">
     <!-- Product cards will be populated here by populate.js -->

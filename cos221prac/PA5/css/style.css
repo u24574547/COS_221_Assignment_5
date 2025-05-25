@@ -741,3 +741,34 @@ nav ul li.dropdown > a {
   align-items: center;
   gap: 5px;
 }
+
+
+/* Category filter styles */
+.product-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.product-filters label {
+  font-weight: 500;
+  color: #333;
+  margin-right: 5px;
+}
+
+#category-filter {
+  padding: 6px 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f9f9f9;
+  font-size: 1rem;
+  color: #222;
+  transition: border-color 0.2s;
+}
+
+#category-filter:focus {
+  border-color: #007bff;
+  outline: none;
+  background: #fff;
+}
