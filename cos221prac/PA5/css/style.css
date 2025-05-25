@@ -568,7 +568,8 @@ footer {
 
 .products input[type="text"],
 .products input[type="password"],
-.products input[type="email"] {
+.products input[type="email"],
+.products select{
   width: 100%;
   padding: 12px 15px;
   border: 1px solid #ddd;
@@ -603,7 +604,7 @@ footer {
   margin-left: 0;
 }
 
-.products input[type="submit"] {
+.products input[type="button"] {
   background-color: #2962ff;
   color: white;
   border: none;
@@ -617,7 +618,7 @@ footer {
   margin-top: 10px;
 }
 
-.products input[type="submit"]:hover {
+.products input[type="button"]:hover {
   background-color: #0039cb;
 }
 
