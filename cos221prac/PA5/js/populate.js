@@ -1,4 +1,4 @@
-const API = "http://localhost/COS%20221/Assignment%205/COS_221_Assignment_5/cos221prac/api.php";
+const API = "../api.php";
 
 function fetchProducts() {
    var xhr = new XMLHttpRequest();
@@ -11,17 +11,17 @@ function fetchProducts() {
                 var response = JSON.parse(xhr.responseText);
                     let data = response.data.products;
                     populateHTML(data);
-               
+
             } catch(e) {
                 console.error ("Failed to parse" +  JSON.parse(xhr.responseText));
             }
         }
-    } 
+    }
 
     const requestBody = JSON.stringify(
         {
             type : "getProducts",
-            limit: 999
+            limit: 50
         }
     );
     xhr.send(requestBody);
