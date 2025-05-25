@@ -291,7 +291,7 @@ if (isset($data->type)) {
             echo $instance->getProducts($data);
             break;
         case "updateUser":
-            echo $instance->getProducts($data);
+            echo $instance->updateUser($data);
             break;
         default:
             echo $instance->response(false, 'post parameters missing');
