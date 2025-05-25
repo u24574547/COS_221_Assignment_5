@@ -5,12 +5,12 @@ $site_description = 'Find the best deals across multiple stores';
 session_start();
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
+$logged_in =isset($_GET['logged_in']) && $_GET['logged_in']==="1";
 
 include 'includes/header.php';
 
 switch ($page) {
   case 'home':
-    // var_dump($page);
     include 'pages/home.php';
     break;
   case 'product':
@@ -33,6 +33,9 @@ switch ($page) {
     break;
   case 'login':
     include 'pages/login.php';
+    break;
+  case 'admin':
+    include 'pages/admin.php';
     break;
   case 'viewall':
     include 'pages/viewall.php';

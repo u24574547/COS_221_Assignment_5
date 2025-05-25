@@ -39,7 +39,11 @@ function login() {
         "email": email,
         "password": password
     }, function (data) {
-        console.log(data.message);
+      if(data.success===true){
+        console.log(data.data.api_key);
+        localStorage.setItem("api_key",data.data.api_key);
+        window.location.replace("index.php?logged_in=1");
+      }
     });
 }
 

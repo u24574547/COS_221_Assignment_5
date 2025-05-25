@@ -112,7 +112,7 @@ $top_stores = [
     'logo' => 'assets/images/stores/walmart.png',
     'products' => 4150
   ],
-  [ 
+  [
     'id' => 4,
     'name' => 'Target',
     'logo' => 'assets/images/stores/target.png',
@@ -120,7 +120,7 @@ $top_stores = [
   ],
 ];
 ?>
-
+<script type='text/javascript' src='js/home.js'></script>
 <section class="hero">
   <div class="hero-content">
     <h1>Find the Best Deals Across the Web</h1>
@@ -151,7 +151,10 @@ $top_stores = [
         </div>
         <div class="product-info">
           <h3><a href=""><?php echo $product['name']; ?></a></h3>
-          <!-- removed price because yeah -->
+          <div class="price-range">
+            <span>Price Range:</span>
+            <strong><?php echo $product['lowest_price']; ?> - <?php echo $product['highest_price']; ?></strong>
+          </div>
           <div class="store-count">
             <i class="fas fa-store"></i> Available at <?php echo $product['stores']; ?> stores
           </div>
@@ -237,4 +240,3 @@ $top_stores = [
     </form>
   </div>
 </section>
-<script src = "js/populate.js"></script>
