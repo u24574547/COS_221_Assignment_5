@@ -10,7 +10,7 @@ include 'includes/header.php';
 
 switch ($page) {
   case 'home':
-    var_dump($page);
+    // var_dump($page);
     include 'pages/home.php';
     break;
   case 'product':
@@ -33,6 +33,9 @@ switch ($page) {
     break;
   case 'login':
     include 'pages/login.php';
+    break;
+  case 'viewall':
+    include 'pages/viewall.php';
     break;
   default:
     include 'pages/404.php';
