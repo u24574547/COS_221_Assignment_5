@@ -297,6 +297,47 @@ class API
             return $this->response(false, "User UPDATE failure: " . $prepared->error);
         }
     }
+
+    public function getUser($data){
+        //with an admin API key to get that admins details: curl -iX POST http://localhost/Practicals/cos221prac/api.php -H "Content-Type: application/json" -d '{"type":"getUser", "api_key":"f1c509ebc0e70ab2eb1a149da0e82370"}'
+        //with an admin API key to get another users details: curl -iX POST http://localhost/Practicals/cos221prac/api.php -H "Content-Type: application/json" -d '{"type":"getUser", "api_key":"f1c509ebc0e70ab2eb1a149da0e82370", "email":"asdfasdf@asdfasdf.com"}'
+        //for a normal user: curl -iX POST http://localhost/Practicals/cos221prac/api.php -H "Content-Type: application/json" -d '{"type":"getUser", "api_key":"526ae9614c6834e4ff56a19a2fa4321f"}'
+
+        if(!isset($data->api_key)){
+            return $this->response(false, 'Missing API key.');
+        }
+        $admin = json_decode($this->verifyAdmin($data));
+        if ($admin->data->isAdmin && isset($data->email)) {
+            $prepared = $this->conn->prepare('SELECT user_id FROM user WHERE email=?');
+            $prepared->bind_param('s', $data->email);
+            $prepared->execute();
+            $prepared->bind_result($data->user_id);
+            if (!$prepared->fetch()) return $this->response(false, 'Invalid email address.');
+            $prepared->close();
+        } else {
+            if(isset($data->email)) return $this->response(false, 'You do not have access to user '.$data->email.'. If this is your email address, do not include it in the request.');
+            $prepared = $this->conn->prepare('SELECT user_id FROM user WHERE api_key=?');
+            $prepared->bind_param('s', $data->api_key);
+            $prepared->execute();
+            $prepared->bind_result($data->user_id);
+            if (!$prepared->fetch()) return $this->response(false, 'Invalid API key.');
+            $prepared->close();
+        }
+
+        $prepared = $this->conn->prepare('SELECT user.fname, user.lname, user.email, IF(admin.user_id IS NOT NULL, "admin", "user") AS type FROM user LEFT JOIN admin ON user.user_id=admin.user_id WHERE user.user_id=?');
+        $prepared->bind_param('i', $data->user_id);
+        $prepared->execute();
+        $result = $prepared->get_result();
+        if ($result->num_rows !== 0) {
+            $row = $result->fetch_assoc();
+            $prepared->close();
+            return $this->response(false, $row);
+        }
+        else{
+            return $this->response(false, 'Invalid API key.');
+        }
+
+    }
 }
 
 $instance = API::instance();
@@ -317,6 +358,9 @@ if (isset($data->type)) {
             break;
         case "updateUser":
             echo $instance->updateUser($data);
+            break;
+        case 'getUser':
+            echo $instance->getUser($data);
             break;
         default:
             echo $instance->response(false, 'post parameters missing');
