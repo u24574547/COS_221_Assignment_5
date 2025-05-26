@@ -58,7 +58,21 @@ window.onload = function (){
         productInfo.appendChild(storeCount);
 
         const compareButton = document.createElement("a");
-        compareButton.href = "#";
+        compareButton.addEventListener("click", function () {
+          const product = data.data.products[i];
+        
+          const queryString = new URLSearchParams({
+            id: product.id,
+            title: product.name,
+            description: product.description,
+            brand: product.brand,
+            category: product.category,
+            image: JSON.parse(product.images)[0],
+          }).toString();
+          console.log("Image URL:", image);
+          window.location.href = `index.php?page=view&${queryString}`;
+        });
+        
         compareButton.className = "compare-button";
         compareButton.textContent = "Compare Prices";
 

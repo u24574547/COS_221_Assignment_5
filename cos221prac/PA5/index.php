@@ -40,6 +40,9 @@ switch ($page) {
   case 'viewall':
     include 'pages/viewall.php';
     break;
+  case 'view':
+    include 'pages/view.php';
+    break;
   default:
     include 'pages/404.php';
 }
