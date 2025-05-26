@@ -41,7 +41,7 @@ window.onload = function (){
         priceLabel.textContent = "Price Range:";
 
         const priceValue = document.createElement("strong");
-        priceValue.textContent = `$5 - $100, the placeholder`;
+        priceValue.textContent = `$5 - $100`;
 
         priceRange.appendChild(priceLabel);
         priceRange.appendChild(priceValue);

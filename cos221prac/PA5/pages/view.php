@@ -17,7 +17,7 @@
     <p><strong>Brand:</strong> <span id="brand">Loading...</span></p>
     <p><strong>Category:</strong> <span id="product-department">Loading...</span></p>
     <p><strong>Description:</strong> <span id="product-description">Loading...</span></p>
-    <p><strong>Average Price:</strong> <span id="average-price">Calculating...</span></p>
+    <p><strong>Average Price:</strong> <span id="average-price">No price available</span></p>
 
   </div>
 
