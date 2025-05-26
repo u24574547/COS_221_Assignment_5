@@ -139,7 +139,10 @@ class API
 
                 // Let password_verify handle the comparison properly
                 if (password_verify($data->password, $row['password'])) {
-                    return $this->response(true, ["api_key" => $row["api_key"]]);
+                    $adminParam = new stdClass();
+                    $adminParam->api_key= $row['api_key'];
+                    $admin = json_decode($this->verifyAdmin($adminParam));
+                    return $this->response(true, ["api_key" => $row["api_key"], "is_admin" => $admin->data->isAdmin]);
                 } else {
                     return $this->response(false, 'password incorrect');
                 }

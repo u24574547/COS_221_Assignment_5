@@ -40,9 +40,10 @@ function login() {
         "password": password
     }, function (data) {
       if(data.success===true){
-        console.log(data.data.api_key);
         localStorage.setItem("api_key",data.data.api_key);
-        window.location.replace("index.php?logged_in=1");
+        localStorage.setItem("is_admin",data.data.is_admin);
+        localStorage.setItem("logged_in","1");
+        window.location.replace("index.php");
       }
     });
 }
