@@ -125,13 +125,6 @@ $top_stores = [
   <div class="hero-content">
     <h1>Find the Best Deals Across the Web</h1>
     <p>Compare prices from hundreds of stores to ensure you always get the best deal</p>
-    <div class="hero-search">
-      <form action="" method="GET">
-        <input type="hidden" name="page" value="search">
-        <input type="text" name="query" placeholder="What are you looking for?" required>
-        <button type="submit">Search</button>
-      </form>
-    </div>
   </div>
 </section>
 
@@ -171,7 +164,7 @@ $top_stores = [
   </div>
   <div class="category-grid">
     <?php foreach ($popular_categories as $category): ?>
-      <a href="" class="category-card">
+      <a href='?page=viewall' class="category-card">
         <div class="category-icon">
           <i class="<?php echo $category['icon']; ?>"></i>
         </div>
@@ -188,7 +181,7 @@ $top_stores = [
   </div>
   <div class="store-grid">
     <?php foreach ($top_stores as $store): ?>
-      <a href="" class="store-card">
+      <a href='?page=viewall' class="store-card">
         <div class="store-logo">
           <img src="<?php echo $store['logo']; ?>" alt="<?php echo $store['name']; ?> Logo">
         </div>
@@ -225,18 +218,5 @@ $top_stores = [
       <h3>Save</h3>
       <p>Find the best deal and save money</p>
     </div>
-  </div>
-</section>
-
-<section class="newsletter">
-  <div class="newsletter-content">
-    <h2>Stay Updated on the Best Deals</h2>
-    <p>Subscribe to our newsletter and never miss out on great savings</p>
-    <form action="" method="POST" class="newsletter-form">
-      <label>
-        <input type="email" name="email" placeholder="Your email address" required>
-      </label>
-      <button type="submit">Subscribe</button>
-    </form>
   </div>
 </section>

@@ -34,33 +34,33 @@ window.onload = function (){
         title.appendChild(link);
         productInfo.appendChild(title);
 
-        const priceRange = document.createElement("div");
-        priceRange.className = "price-range";
+        //const priceRange = document.createElement("div");
+        //priceRange.className = "price-range";
 
-        const priceLabel = document.createElement("span");
-        priceLabel.textContent = "Price Range:";
+        //const priceLabel = document.createElement("span");
+        //priceLabel.textContent = "Price Range:";
 
-        const priceValue = document.createElement("strong");
-        priceValue.textContent = `$5 - $10, the placeholder`;
+        //const priceValue = document.createElement("strong");
+        //priceValue.textContent = `$5 - $10, the placeholder`;
 
-        priceRange.appendChild(priceLabel);
-        priceRange.appendChild(priceValue);
-        productInfo.appendChild(priceRange);
+        //priceRange.appendChild(priceLabel);
+        //priceRange.appendChild(priceValue);
+        //productInfo.appendChild(priceRange);
 
-        const storeCount = document.createElement("div");
-        storeCount.className = "store-count";
+        //const storeCount = document.createElement("div");
+        //storeCount.className = "store-count";
 
         const storeIcon = document.createElement("i");
         storeIcon.className = "fas fa-store";
 
-        storeCount.appendChild(storeIcon);
-        storeCount.appendChild(document.createTextNode(` Available at [placeholder] stores`));
-        productInfo.appendChild(storeCount);
+        //storeCount.appendChild(storeIcon);
+        //storeCount.appendChild(document.createTextNode(` Available at [placeholder] stores`));
+        //productInfo.appendChild(storeCount);
 
         const compareButton = document.createElement("a");
         compareButton.addEventListener("click", function () {
           const product = data.data.products[i];
-        
+
           const queryString = new URLSearchParams({
             id: product.id,
             title: product.name,
@@ -72,7 +72,7 @@ window.onload = function (){
           console.log("Image URL:", image);
           window.location.href = `index.php?page=view&${queryString}`;
         });
-        
+
         compareButton.className = "compare-button";
         compareButton.textContent = "Compare Prices";
 
