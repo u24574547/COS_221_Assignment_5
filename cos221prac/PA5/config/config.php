@@ -1,19 +1,21 @@
 <?php
 function getDBConnection()
 {
-    $servername = "localhost";
+    $hostname = "127.0.0.1";  // force TCP
     $username = "root";
-    $password = "Kutlwano@2007";
-    // Create connection
+    $password = "";
+    $port     = 3307;         // custom port
     $conn = new mysqli(
-        $servername,
+        $hostname,
         $username,
-        $password
+        $password,
+        "",       // leave blank so you can select_db in the API
+        $port
     );
-    // Check connection
+
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    // echo "Connected successfully";
+
     return $conn;
 }
