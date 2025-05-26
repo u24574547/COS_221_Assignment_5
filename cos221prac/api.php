@@ -1,4 +1,9 @@
 <?php
+//Enabled php error reporting
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 spl_autoload_register(function ($class) {
     require __DIR__ . "/PA5/config/$class.php";
 });
@@ -123,24 +128,48 @@ class API
 
     public function getProducts($data) //curl -X POST http://localhost/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\"}"
     {
-        $stmt = $this->conn->prepare("SELECT * FROM `products` WHERE 1 LIMIT ?");
-        $stmt->bind_param("i", $data->limit);
+        // I made changes pretty much evrywhere for an optional category parameter
+        // Check if category is provided and non-empty
+        if (isset($data->category) && $data->category !== "") {
+            $stmt = $this->conn->prepare("SELECT * FROM `products` WHERE category = ? LIMIT ?");
+            $stmt->bind_param("si", $data->category, $data->limit);
+        } else {
+            // Fallback to getting all products
+            $stmt = $this->conn->prepare("SELECT * FROM `products` LIMIT ?");
+            $stmt->bind_param("i", $data->limit);
+        }
 
         if ($stmt->execute()) {
             $result = $stmt->get_result();
             $products = [];
 
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    array_push($products, $row);
-                }
-                return $this->response(true, ['products' => $products]);
+            while ($row = $result->fetch_assoc()) {
+                $products[] = $row;
             }
 
-            return $this->response(false, 'no products found');
+            if (!empty($products)) {
+                return $this->response(true, ['products' => $products]);
+            } else {
+                return $this->response(false, 'no products found');
+            }
         } else {
             return $this->response(false, $stmt->error);
         }
+    }
+
+    // I added this funciton for getting the categories of products
+    public function getCategories($data)
+    {
+        $stmt = $this->conn->prepare("SELECT DISTINCT category FROM products");
+        if (! $stmt->execute()) {
+            return $this->response(false, 'DB error: ' . $stmt->error);
+        }
+        $result = $stmt->get_result();
+        $cats = [];
+        while ($row = $result->fetch_assoc()) {
+            $cats[] = $row['category'];
+        }
+        return $this->response(true, ['categories' => $cats]);
     }
 }
 
@@ -156,6 +185,9 @@ if (isset($data->type)) {
             break;
         case "getProducts":
             echo $instance->getProducts($data);
+            break;
+        case "getCategories":
+            echo $instance->getCategories($data);
             break;
         default:
             echo $instance->response(false, 'post parameters missing');

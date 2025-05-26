@@ -112,7 +112,7 @@ $top_stores = [
     'logo' => 'assets/images/stores/walmart.png',
     'products' => 4150
   ],
-  [
+  [ 
     'id' => 4,
     'name' => 'Target',
     'logo' => 'assets/images/stores/target.png',
@@ -138,7 +138,7 @@ $top_stores = [
 <section class="featured-products">
   <div class="section-header">
     <h2>Featured Products</h2>
-    <a href="" class="view-all">View All</a>
+    <a href="?page=viewall" class="view-all">View All</a>
   </div>
   <div class="product-grid">
     <?php foreach ($featured_products as $product): ?>
@@ -151,10 +151,7 @@ $top_stores = [
         </div>
         <div class="product-info">
           <h3><a href=""><?php echo $product['name']; ?></a></h3>
-          <div class="price-range">
-            <span>Price Range:</span>
-            <strong><?php echo /*formatPrice(*/$product['lowest_price']/*)*/; ?> - <?php echo /*formatPrice(*/$product['highest_price']/*)*/; ?></strong>
-          </div>
+          <!-- removed price because yeah -->
           <div class="store-count">
             <i class="fas fa-store"></i> Available at <?php echo $product['stores']; ?> stores
           </div>
@@ -240,3 +237,4 @@ $top_stores = [
     </form>
   </div>
 </section>
+<script src = "js/populate.js"></script>
