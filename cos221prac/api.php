@@ -152,12 +152,15 @@ class API
 
     public function verifyAdmin($data) //accepts either email or api_key, returns json object with {success: true, data: {isAdmin: true/false}}
     {
-        if (isset($data->email)) {
+        /*if (isset($data->email)) {
             $stmt = $this->conn->prepare("SELECT user_id FROM user WHERE email = ?");
             $stmt->bind_param("s", $data->email);
-        } else if (isset($data->api_key)) {
+        } else */if (isset($data->api_key)) {
             $stmt = $this->conn->prepare("SELECT user_id FROM user WHERE api_key = ?");
             $stmt->bind_param("s", $data->api_key);
+        }
+        else {
+            return $this->response(true, ['isAdmin' => false]);
         }
 
         if ($stmt->execute()) {
@@ -167,8 +170,8 @@ class API
 
                 $stmtA = $this->conn->prepare("SELECT * FROM `admin` WHERE 1 AND user_id = ?"); //user is admin if user_id is in admin table
                 $stmtA->bind_param("s", $row['user_id']);
-                if ($stmt->execute()) {
-                    $resultA = $stmt->get_result();
+                if ($stmtA->execute()) {
+                    $resultA = $stmtA->get_result();
                     if ($resultA->num_rows !== 0) {
                         return $this->response(true, ['isAdmin' => true]);
                     } else {
@@ -219,11 +222,33 @@ class API
         }
     }
 
-    public function updateUser($data) //curl -X POST http://localhost/COS_221_Assignment_5/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"updateUser\",\"user_id\":\"2\",\"fname\":\"frank\",\"lname\":\"horigan\",\"email\":\"asdfasdf@asdfasdf.com\"}"
+    public function updateUser($data) //curl -iX POST [absolute path to api.php] -H "Content-Type: application/json" -d '{"type":"updateUser","fname":"frank","lname":"horigan","oldEmail":"asdfasdf@asdfasdf.com", "api_key":"f1c509ebc0e70ab2eb1a149da0e82370"}'
     {
-        // if (!$this->verifyAdmin($data->api_key)) {
-        //     return $this->response(false, "you are not an admin");
-        // }
+        if(!isset($data->api_key)){
+            return $this->response(false, 'Missing API key.');
+        }
+        if(isset($data->oldEmail)){
+            $admin = json_decode($this->verifyAdmin($data));
+            if($admin->data->isAdmin){
+                $prepared = $this->conn->prepare("SELECT user_id FROM user WHERE email=?");
+                $prepared->bind_param('s', $data->oldEmail);
+                $prepared->execute();
+                $prepared->bind_result($data->user_id);
+                if(!$prepared->fetch()) return $this->response(false, 'Invalid old email');
+                $prepared->close();
+            }
+            else{
+                return $this->response(false, 'You do not have access to edit another users details or your API key is invalid.');
+            }
+        }
+        else{
+            $prepared = $this->conn->prepare('SELECT user_id FROM user WHERE api_key=?');
+            $prepared->bind_param('s', $data->api_key);
+            $prepared->execute();
+            $prepared->bind_result($data->user_id);
+            if (!$prepared->fetch()) return $this->response(false, 'Invalid API key.');
+            $prepared->close();
+        }
 
         $setParts = [];
         $params = [];
