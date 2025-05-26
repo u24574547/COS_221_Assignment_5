@@ -43,8 +43,14 @@ function register() {
         "email": email,
         "password": password
     }, function (data) {
-        console.log(data.message);
-
+        console.log(data.data);
+        if(data.success===false){
+          alert("Registration failed: "+data.data);
+        }
+        else if(data.success===true){
+          alert("Registered successfully. Please log in to use your account.");
+          window.location.replace("index.php?page=login");
+        }
     });
 }
 

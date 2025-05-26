@@ -334,7 +334,7 @@ class API
         if ($result->num_rows !== 0) {
             $row = $result->fetch_assoc();
             $prepared->close();
-            return $this->response(false, $row);
+            return $this->response(true, $row);
         }
         else{
             return $this->response(false, 'Invalid API key.');
