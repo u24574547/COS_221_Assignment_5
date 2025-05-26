@@ -50,4 +50,12 @@ function editUserDetails() {
   });*/
 }
 
-console.log('register loaded');
+window.onload = function(){
+  document.getElementById("search-form").addEventListener("submit", function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+    const query = formData.get("query");
+
+    console.log("Searching for:", query);
+  });
+}

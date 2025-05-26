@@ -5,10 +5,10 @@
     <h1 > Admin Management </h1 >
     <p > Search for a user below </p >
     <div class='hero-search' >
-      <form action = '' method = 'GET' >
+      <form id="search-form">
         <input type = 'hidden' name = 'page' value = 'search' >
         <input type = 'text' name = 'query' placeholder = 'Enter user email address' required >
-        <button type = 'submit' > Search</button >
+        <button>Search</button >
       </form >
     </div >
   </div >
