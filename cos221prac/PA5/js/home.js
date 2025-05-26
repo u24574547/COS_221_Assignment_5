@@ -62,14 +62,15 @@ window.onload = function (){
           const product = data.data.products[i];
 
           const queryString = new URLSearchParams({
-            id: product.id,
+            id: product.product_id,
             title: product.name,
             description: product.description,
             brand: product.brand,
             category: product.category,
-            image: JSON.parse(product.images)[0],
+            image: JSON.parse(product.images)[0]
           }).toString();
-          console.log("Image URL:", image);
+          //console.log("Image URL:", product.images[0]);
+          //console.log(product.id);
           window.location.href = `index.php?page=view&${queryString}`;
         });
 
@@ -110,7 +111,7 @@ function ajax(data, callback) {
   var req = new XMLHttpRequest();
   req.onreadystatechange = function () {
     if (req.readyState == 4 && req.status == 200) {
-      console.log(req.responseText);
+      //console.log(req.responseText);
 
       var json = JSON.parse(req.responseText);
       callback(json);

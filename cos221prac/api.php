@@ -189,42 +189,58 @@ class API
     }
 
     public function getProducts($data)
-    // curl -X POST http://localhost/COS_221_Assignment_5/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\"}"
-    // curl -X POST http://localhost/COS_221_Assignment_5/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\", \"search\":{\"brand\":\"Essence\"}}"
     {
-        $query = "SELECT * FROM `products` WHERE 1";
+        // Start with a base query
+        $query = "SELECT * FROM products WHERE 1";
 
-        // WHERE
+        // ——— Optional CATEGORY filter ———
+        if (isset($data->category) && $data->category !== "") {
+            // escape to avoid injection
+            $cat = $this->conn->real_escape_string($data->category);
+
+            if (isset($data->fuzzy) && $data->fuzzy === true) {
+                $query .= " AND category REGEXP '" . $cat . "'";
+            } else {
+                $query .= " AND category = '" . $cat . "'";
+            }
+        }
+
+        // ——— Other SEARCH properties ———
         if (isset($data->search)) {
             $properties = get_object_vars($data->search);
             foreach ($properties as $name => $value) {
+                // skip price_min / price_max here (you could add them below if needed)
                 if ($name !== "price_min" && $name !== "price_max") {
-                    if (isset($data->fuzzy) && $data->fuzzy === true)
-                        $query .= " and " . $name . " REGEXP '" . $value . "'";
-                    else
-                        $query .= " and " . $name . " = '" . $value . "'";
+                    $val = $this->conn->real_escape_string($value);
+                    if (isset($data->fuzzy) && $data->fuzzy === true) {
+                        $query .= " AND {$name} REGEXP '{$val}'";
+                    } else {
+                        $query .= " AND {$name} = '{$val}'";
+                    }
                 }
             }
         }
 
-        // LIMIT
+        // ——— LIMIT ———
         if (isset($data->limit) && is_numeric($data->limit)) {
             $query .= " LIMIT " . (int)$data->limit;
         }
 
+        // Execute
         $result = $this->conn->query($query);
 
         if ($result) {
             $productsArr = [];
             while ($row = $result->fetch_assoc()) {
-                array_push($productsArr, $row);
+                $productsArr[] = $row;
             }
-            return $this->response(true, ['products' => $productsArr]);;
+            return $this->response(true, ['products' => $productsArr]);
         } else {
-            return $this->response(false, 'failed to retrieve products');;
+            return $this->response(false, 'failed to retrieve products');
         }
     }
 
+    
     public function updateUser($data) //curl -iX POST [absolute path to api.php] -H "Content-Type: application/json" -d '{"type":"updateUser","fname":"frank","lname":"horigan","oldEmail":"asdfasdf@asdfasdf.com", "api_key":"f1c509ebc0e70ab2eb1a149da0e82370"}'
     {
         if(!isset($data->api_key)){
@@ -341,6 +357,63 @@ class API
         }
 
     }
+
+
+    public function getVendorListingsForProduct($data)
+    {
+        if (!isset($data->product_id)) {
+            return $this->response(false, 'Missing product_id');
+        }
+
+        $stmt = $this->conn->prepare("
+            SELECT 
+                l.listing_id,
+                l.price,
+                l.currency,
+                l.in_stock,
+                l.last_updated,
+                v.name AS vendor_name,
+                v.website_url
+            FROM listing l
+            JOIN vendor v ON l.vendor_id = v.vendor_id
+            WHERE l.product_id = ?
+            ORDER BY l.price ASC
+        ");
+        $stmt->bind_param("i", $data->product_id);
+
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            $listings = [];
+
+            while ($row = $result->fetch_assoc()) {
+                $listings[] = $row;
+            }
+
+            if (count($listings) > 0) {
+                return $this->response(true, ["listings" => $listings]);
+            } else {
+                return $this->response(false, "No listings found for this product");
+            }
+        } else {
+            return $this->response(false, $stmt->error);
+        }
+        
+    }
+
+    public function getCategories($data)
+    {
+        $stmt = $this->conn->prepare("SELECT DISTINCT category FROM products");
+        if (! $stmt->execute()) {
+            return $this->response(false, 'DB error: ' . $stmt->error);
+        }
+        $result = $stmt->get_result();
+        $cats = [];
+        while ($row = $result->fetch_assoc()) {
+            $cats[] = $row['category'];
+        }
+        return $this->response(true, ['categories' => $cats]);
+    }
+
 }
 
 $instance = API::instance();
@@ -359,12 +432,20 @@ if (isset($data->type)) {
         case "getProducts":
             echo $instance->getProducts($data);
             break;
+        case "getCategories":
+            echo $instance->getCategories($data);
+            break;
         case "updateUser":
             echo $instance->updateUser($data);
             break;
         case 'getUser':
             echo $instance->getUser($data);
             break;
+
+        case "getVendorListingsForProduct":
+            echo $instance->getVendorListingsForProduct($data);
+            break;
+            
         default:
             echo $instance->response(false, 'post parameters missing');
     }

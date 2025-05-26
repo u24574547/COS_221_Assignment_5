@@ -6,11 +6,10 @@
       <label for="category-filter">Filter by Category:</label>
       <select id="category-filter">
       <option value="all">All</option>
-      <option value="electronics">Electronics</option>
-      <option value="clothing">Clothing</option>
-      <option value="books">Books</option>
-      <!-- Add categories dynamically?-->
+      
+      <!-- Add categories dynamically-->
       </select>
+      <button id="apply-filters">Apply</button>
     </div>
   </div>
   <div class="product-grid">
@@ -18,3 +17,4 @@
   </div>
 </section>
 <script src="js/populate.js"></script>
+<script src="js/view.js"></script> <!-- For compare button redirection behavior -->
