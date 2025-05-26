@@ -98,36 +98,7 @@ class API
         $password = password_hash($data->password, PASSWORD_DEFAULT);
 
         if ($stmt->execute()) {
-            $stmtC = $this->conn->prepare("
-            INSERT INTO `customer`(`user_id`, `customer_id`, `num_purchases`, `total_spent`) 
-            VALUES (?,?,0,0)
-            ");
-            $stmtC->bind_param(
-                'ii',
-                $user_id,
-                $customer_id,
-            );
-
-            $user_id = -1;
-            $stmtU = $this->conn->prepare("
-            SELECT user_id FROM `user` WHERE 1 AND api_key = ?
-            ");
-            $stmtU->bind_param('s', $api_key);
-            if ($stmtU->execute()) {
-                $result = $stmtU->get_result();
-                if ($result->num_rows !== 0) {
-                    $row = $result->fetch_assoc();
-                    $user_id = $row['user_id'];
-                }
-            }
-
-            $customer_id = $user_id;
-
-            if ($user_id !== -1 && $stmtC->execute()) {
-                return $this->response(true, ["api_key" => $api_key]);
-            }
-
-            return $this->response(false, ["api_key" => $api_key, 'message' => 'added user but failed to add customer']);
+            return $this->response(true, ["api_key" => $api_key]);
         } else {
             return $this->response(false, $stmt->error, ["timestamp" => (int)(microtime(true) * 1000)]);
         }
@@ -157,24 +128,48 @@ class API
 
     public function getProducts($data) //curl -X POST http://localhost/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\"}"
     {
-        $stmt = $this->conn->prepare("SELECT * FROM `products` WHERE 1 LIMIT ?");
-        $stmt->bind_param("i", $data->limit);
+        // I made changes pretty much evrywhere for an optional category parameter
+        // Check if category is provided and non-empty
+        if (isset($data->category) && $data->category !== "") {
+            $stmt = $this->conn->prepare("SELECT * FROM `products` WHERE category = ? LIMIT ?");
+            $stmt->bind_param("si", $data->category, $data->limit);
+        } else {
+            // Fallback to getting all products
+            $stmt = $this->conn->prepare("SELECT * FROM `products` LIMIT ?");
+            $stmt->bind_param("i", $data->limit);
+        }
 
         if ($stmt->execute()) {
             $result = $stmt->get_result();
             $products = [];
 
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    array_push($products, $row);
-                }
-                return $this->response(true, ['products' => $products]);
+            while ($row = $result->fetch_assoc()) {
+                $products[] = $row;
             }
 
-            return $this->response(false, 'no products found');
+            if (!empty($products)) {
+                return $this->response(true, ['products' => $products]);
+            } else {
+                return $this->response(false, 'no products found');
+            }
         } else {
             return $this->response(false, $stmt->error);
         }
+    }
+
+    // I added this funciton for getting the categories of products
+    public function getCategories($data)
+    {
+        $stmt = $this->conn->prepare("SELECT DISTINCT category FROM products");
+        if (! $stmt->execute()) {
+            return $this->response(false, 'DB error: ' . $stmt->error);
+        }
+        $result = $stmt->get_result();
+        $cats = [];
+        while ($row = $result->fetch_assoc()) {
+            $cats[] = $row['category'];
+        }
+        return $this->response(true, ['categories' => $cats]);
     }
 }
 
@@ -188,11 +183,11 @@ if (isset($data->type)) {
         case "login":
             echo $instance->login($data);
             break;
-        case "verifyAdmin":
-            echo $instance->verifyAdmin($data);
-            break;
         case "getProducts":
             echo $instance->getProducts($data);
+            break;
+        case "getCategories":
+            echo $instance->getCategories($data);
             break;
         default:
             echo $instance->response(false, 'post parameters missing');
