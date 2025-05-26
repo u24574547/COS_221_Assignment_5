@@ -15,7 +15,7 @@
   <div class='products-position'>
     <div class='products' id='productsHolder'>
       <h2> User details Editor </h2>
-      <form>
+      <form id="updateUserForm">
         <label for='name'> Name:</label><br>
         <input type='text' id='fname' name='fname' required><br><br>
 
