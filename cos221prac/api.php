@@ -142,6 +142,48 @@ class API
             return $this->response(false, $stmt->error);
         }
     }
+
+
+    public function getVendorListingsForProduct($data)
+{
+    if (!isset($data->product_id)) {
+        return $this->response(false, 'Missing product_id');
+    }
+
+    $stmt = $this->conn->prepare("
+        SELECT 
+            l.listing_id,
+            l.price,
+            l.currency,
+            l.in_stock,
+            l.last_updated,
+            v.name AS vendor_name,
+            v.website_url
+        FROM listing l
+        JOIN vendor v ON l.vendor_id = v.vendor_id
+        WHERE l.product_id = ?
+        ORDER BY l.price ASC
+    ");
+    $stmt->bind_param("i", $data->product_id);
+
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $listings = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $listings[] = $row;
+        }
+
+        if (count($listings) > 0) {
+            return $this->response(true, ["listings" => $listings]);
+        } else {
+            return $this->response(false, "No listings found for this product");
+        }
+    } else {
+        return $this->response(false, $stmt->error);
+    }
+}
+
 }
 
 $instance = API::instance();
@@ -157,6 +199,11 @@ if (isset($data->type)) {
         case "getProducts":
             echo $instance->getProducts($data);
             break;
+
+        case "getVendorListingsForProduct":
+            echo $instance->getVendorListingsForProduct($data);
+            break;
+            
         default:
             echo $instance->response(false, 'post parameters missing');
     }
