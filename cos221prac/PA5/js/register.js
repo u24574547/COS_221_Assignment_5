@@ -44,6 +44,7 @@ function register() {
         "password": password
     }, function (data) {
         console.log(data.message);
+
     });
 }
 
