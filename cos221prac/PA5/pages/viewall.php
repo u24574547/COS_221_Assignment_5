@@ -18,3 +18,4 @@
   </div>
 </section>
 <script src="js/populate.js"></script>
+<script src="js/view.js"></script> <!-- For compare button redirection behavior -->

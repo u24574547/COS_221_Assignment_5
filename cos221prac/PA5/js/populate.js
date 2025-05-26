@@ -66,10 +66,36 @@ function populateHTML(products) {
                 <div class="store-count">
                     <i class="fas fa-store"></i> Available at ${product.stores || 1} stores
                 </div>
-                <a href="" class="compare-button">Compare Prices</a>
+                <a href="#" class="compare-button">Compare Prices</a>
             </div>
         `;
         grid.appendChild(card);
+        const compareBtn = card.querySelector('.compare-button');
+        compareBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // Parse images
+            let images = product.images;
+            if (typeof images === "string") {
+                try {
+                    images = JSON.parse(images);
+                } catch {
+                    images = [];
+                }
+            }
+
+            const queryString = new URLSearchParams({
+                id: product.product_id,
+                title: product.name,
+                description: product.description || '',
+                brand: product.brand || '',
+                category: product.category || '',
+                image: images[0] || ''
+            }).toString();
+
+            window.location.href = `index.php?page=view&${queryString}`;
+        });
+
     });
 }
 
