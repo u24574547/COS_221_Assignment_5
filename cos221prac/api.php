@@ -182,7 +182,9 @@ class API
         }
     }
 
-    public function getProducts($data) //curl -X POST http://localhost/COS_221_Assignment_5/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\"}"
+    public function getProducts($data)
+    // curl -X POST http://localhost/COS_221_Assignment_5/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\"}"
+    // curl -X POST http://localhost/COS_221_Assignment_5/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"getProducts\", \"limit\":\"50\", \"search\":{\"brand\":\"Essence\"}}"
     {
         $query = "SELECT * FROM `products` WHERE 1";
 
@@ -216,6 +218,60 @@ class API
             return $this->response(false, 'failed to retrieve products');;
         }
     }
+
+    public function updateUser($data) //curl -X POST http://localhost/COS_221_Assignment_5/cos221prac/api.php -H "Content-Type: application/json" -d "{\"type\":\"updateUser\",\"user_id\":\"2\",\"fname\":\"frank\",\"lname\":\"horigan\",\"email\":\"asdfasdf@asdfasdf.com\"}"
+    {
+        // if (!$this->verifyAdmin($data->api_key)) {
+        //     return $this->response(false, "you are not an admin");
+        // }
+
+        $setParts = [];
+        $params = [];
+        $types = '';
+
+        if (isset($data->fname)) {
+            $setParts[] = "fname = ?";
+            $params[] = $data->fname;
+            $types .= 's';
+        }
+        if (isset($data->lname)) {
+            $setParts[] = "lname = ?";
+            $params[] = $data->lname;
+            $types .= 's';
+        }
+        if (isset($data->password)) {
+            $setParts[] = "password = ?";
+            $params[] = $data->password;
+            $types .= 's';
+        }
+        if (isset($data->email)) {
+            $setParts[] = "email = ?";
+            $params[] = $data->email;
+            $types .= 's';
+        }
+
+        if (empty($setParts)) {
+            return $this->response(false, "No fields to update");
+        }
+
+        $params[] = $data->user_id;
+        $types .= 'i';
+
+        $stmt = "UPDATE `user` SET " . implode(', ', $setParts) . " WHERE user_id = ?";
+
+        $prepared = $this->conn->prepare($stmt);
+        if (!$prepared) {
+            return $this->response(false, "Prepare failed: " . $this->conn->error);
+        }
+
+        $prepared->bind_param($types, ...$params);
+
+        if ($prepared->execute()) {
+            return $this->response(true, "User UPDATE success");
+        } else {
+            return $this->response(false, "User UPDATE failure: " . $prepared->error);
+        }
+    }
 }
 
 $instance = API::instance();
@@ -233,6 +289,9 @@ if (isset($data->type)) {
             break;
         case "getProducts":
             echo $instance->getProducts($data);
+            break;
+        case "updateUser":
+            echo $instance->updateUser($data);
             break;
         default:
             echo $instance->response(false, 'post parameters missing');
