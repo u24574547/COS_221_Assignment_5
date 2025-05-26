@@ -411,6 +411,39 @@ class API
         return $this->response(true, ['categories' => $cats]);
     }
 
+
+        public function getReviews($data)
+    {
+        if (!isset($data->product_id)) {
+            return $this->response(false, "Missing product_id");
+        }
+
+        $stmt = $this->conn->prepare("
+            SELECT 
+                r.rating,
+                r.comment,
+                r.date_created,
+                CONCAT(u.fname, ' ', u.lname) AS user_name
+            FROM review r
+            JOIN listing l ON r.listing_id = l.listing_id
+            JOIN user u ON r.user_id = u.user_id
+            WHERE l.product_id = ?
+            ORDER BY r.date_created DESC
+        ");
+        $stmt->bind_param("i", $data->product_id);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $reviews = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $reviews[] = $row;
+        }
+
+        return $this->response(true, $reviews);
+    }
+
+
 }
 
 $instance = API::instance();
@@ -441,6 +474,10 @@ if (isset($data->type)) {
 
         case "getVendorListingsForProduct":
             echo $instance->getVendorListingsForProduct($data);
+            break;
+
+        case "getReviews":
+            echo $instance->getReviews($data);
             break;
             
         default:

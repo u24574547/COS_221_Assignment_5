@@ -18,7 +18,10 @@
     <p><strong>Category:</strong> <span id="product-department">Loading...</span></p>
     <p><strong>Description:</strong> <span id="product-description">Loading...</span></p>
     <p><strong>Average Price:</strong> <span id="average-price">No price available</span></p>
-
+    <div id="review-section">
+    <p><strong>Rating:</strong> <span id="product-rating">No rating available</span></p>
+    <div id="product-comments">No reviews</div>
+  </div>
   </div>
 
   <!-- Right side: Vendor Prices (future) -->

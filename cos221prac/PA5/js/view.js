@@ -96,6 +96,53 @@ function renderVendorListings(listings) {
     }
 }
 
+function fetchProductReviews(productId) {
+    fetch("../api.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            type: "getReviews",
+            product_id: parseInt(productId)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const ratingElem = document.getElementById("product-rating");
+        const commentContainer = document.getElementById("product-comments");
+
+        if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+            ratingElem.textContent = "No rating yet";
+            commentContainer.innerHTML = "<p>No reviews yet.</p>";
+            return;
+        }
+
+        // Compute average rating
+        let totalRating = 0;
+        data.data.forEach(r => totalRating += parseFloat(r.rating));
+        const avgRating = (totalRating / data.data.length).toFixed(1);
+
+        // Show average rating
+        ratingElem.textContent = `${avgRating} / 10 (${data.data.length} reviews)`;
+
+        // Render each comment
+        commentContainer.innerHTML = "";
+        data.data.forEach(review => {
+            const reviewDiv = document.createElement("div");
+            reviewDiv.className = "review-comment";
+            reviewDiv.innerHTML = `
+                <p><em>"${review.comment}"</em> - <strong>${review.user_name}</strong>, <small>${new Date(review.date_created).toLocaleDateString()}</small></p>
+            `;
+            commentContainer.appendChild(reviewDiv);
+        });
+    })
+    .catch(error => {
+        console.error("Error fetching product reviews:", error);
+        document.getElementById("product-rating").textContent = "Error loading rating";
+        document.getElementById("product-comments").innerHTML = "<p>Error loading reviews.</p>";
+    });
+}
+
+
 
 // Initialize once DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
@@ -104,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (product.id) {
         displayProductDetails(product);
         fetchVendorListings(product.id);
+        fetchProductReviews(product.id);
     } else {
         document.querySelector(".view-container").innerHTML = "<p>Product not found in URL.</p>";
     }
