@@ -32,7 +32,7 @@ function displayProductDetails(product) {
 
     // Update product info text fields
     document.getElementById("product-title").textContent = product.title || "No title";
-    document.getElementById("brand").textContent = product.brand || "No brand info";
+    document.getElementById("brand").textContent = product.brand || "Best Buy";
     document.getElementById("product-department").textContent = product.category || "No category";
     document.getElementById("product-description").textContent = product.description || "No description";
 }
