@@ -61,10 +61,10 @@ function populateHTML(products) {
                 <h3><a href="">${product.name}</a></h3>
                 <div class="price-range">
                     <span>Price:</span>
-                    <strong>${product.price ? product.price : 'N/A'}</strong>
+                    <strong>${product.price ? product.price : '$5 - $100 (placeholder)'}</strong>
                 </div>
                 <div class="store-count">
-                    <i class="fas fa-store"></i> Available at ${product.stores || 1} stores
+                    <i class="fas fa-store"></i> Available at ${product.stores || "(placeholder)"} stores
                 </div>
                 <a href="" class="compare-button">Compare Prices</a>
             </div>
