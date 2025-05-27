@@ -1,3 +1,5 @@
+var oldEmail = "";
+
 function element(id) {
   return document.getElementById(id);
 }
@@ -32,6 +34,7 @@ function ajax(data, callback) {
 }
 
 function editUserDetails() {
+  if(oldEmail==="") return;
   var fname = element('fname').value;
   var lname = element('lname').value;
   var email = element('email').value;
@@ -44,16 +47,20 @@ function editUserDetails() {
   );
 
 
-  /*ajax({
-    "type": "register",
+  ajax({
+    "type": "updateUser",
     'fname': fname,
     'lname': lname,
     "email": email,
-    "password": password
+    "oldEmail": oldEmail,
+    "api_key": localStorage.getItem("api_key"),
+    "user_type": userType
   }, function (data) {
-    console.log(data.message);
+    if(data.success){
+      alert("Successfully updated user with email: "+oldEmail+"'s details.");
+    }
 
-  });*/
+  });
 }
 
 window.onload = function () {
@@ -66,6 +73,7 @@ window.onload = function () {
       "api_key": localStorage.getItem("api_key"), "type": "getUser", "email": query
     }, (response) => {
       if (response.success) {
+        oldEmail = query;
         const form = document.getElementById("updateUserForm");
         form.elements["fname"].value = response.data.fname;
         form.elements["lname"].value = response.data.lname;
