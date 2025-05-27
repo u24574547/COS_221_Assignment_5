@@ -12,15 +12,6 @@ switch ($page) {
   case 'home':
     include 'pages/home.php';
     break;
-  case 'product':
-    include 'pages/product.php';
-    break;
-  case 'category':
-    include 'pages/category.php';
-    break;
-  case 'search':
-    include 'pages/search.php';
-    break;
   case 'about':
     include 'pages/about.php';
     break;
