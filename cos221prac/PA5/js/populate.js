@@ -120,10 +120,6 @@ function populateHTML(products) {
             </div>
             <div class="product-info">
                 <h3><a href="">${product.name}</a></h3>
-                <div class="price-range">
-                    <span>Price:</span>
-                    <strong>${product.price ? product.price : 'N/A'}</strong>
-                </div>
                 <div class="store-count">
                     <i class="fas fa-store"></i> Available at ${product.stores || 1} stores
                 </div>
