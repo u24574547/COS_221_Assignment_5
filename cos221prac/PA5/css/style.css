@@ -758,7 +758,7 @@ nav ul li.dropdown > a {
   margin-right: 5px;
 }
 
-#category-filter {
+#category-filter, #vendor-filter {
   padding: 6px 14px;
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -768,8 +768,28 @@ nav ul li.dropdown > a {
   transition: border-color 0.2s;
 }
 
-#category-filter:focus {
+#category-filter:focus,
+#vendor-filter:focus {
   border-color: #007bff;
   outline: none;
   background: #fff;
+}
+
+#apply-filters {
+  background-color: #2962ff;
+  color: white;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-left: 10px;
+}
+
+#apply-filters:hover,
+#apply-filters:focus {
+  background-color: #0039cb;
+  outline: none;
 }

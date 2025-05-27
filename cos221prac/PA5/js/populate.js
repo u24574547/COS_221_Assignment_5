@@ -4,35 +4,37 @@ const API = "../api.php";
 function fetchProducts() {
    var xhr = new XMLHttpRequest();
    var category = document.getElementById('category-filter').value;
-    xhr.open("POST", API, true);
-    xhr.setRequestHeader("Content-Type", "application/json");
+   var vendorId = document.getElementById('vendor-filter').value;
 
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            try {
-                var response = JSON.parse(xhr.responseText);
-                    let data = response.data.products;
-                    populateHTML(data);
-               
-            } catch(e) {
-                console.error ("Failed to parse" +  JSON.parse(xhr.responseText));
-            }
-        }
-    };
+   xhr.open("POST", API, true);
+   xhr.setRequestHeader("Content-Type", "application/json");
 
-    
-        
-    var payload = {
-        type: "getProducts",
-        limit: 50
-    };
-    if (category && category !== 'all') {
-        payload.category = category;  // ← new
-    }
-    
+   xhr.onreadystatechange = function() {
+       if (xhr.readyState == 4 && xhr.status == 200) {
+           try {
+               var response = JSON.parse(xhr.responseText);
+               let data = response.data.products;
+               populateHTML(data);
+           } catch(e) {
+               console.error ("Failed to parse" +  JSON.parse(xhr.responseText));
+           }
+       }
+   };
 
-    xhr.send(JSON.stringify(payload));
+   var payload = {
+       type: "getProducts",
+       limit: 50
+   };
+   if (category && category !== 'all') {
+       payload.category = category;
+   }
+   if (vendorId && vendorId !== 'all') {
+       payload.vendor_id = vendorId;
+   }
+
+   xhr.send(JSON.stringify(payload));
 }
+
 // Helper funciton
 async function callAPI(body) {
   const res = await fetch(API, {           // adjust path if needed
@@ -60,6 +62,27 @@ async function fetchCategories() {
     });
   } catch (err) {
     console.error('Could not load categories:', err);
+  }
+}
+
+async function fetchVendors() {
+  try {
+    const json = await callAPI({ type: 'getVendors' });
+    if (!json.success) throw new Error(json.data);
+    const select = document.getElementById('vendor-filter');
+
+    // Clear existing options except "All"
+    select.querySelectorAll('option:not([value="all"])')
+          .forEach(opt => opt.remove());
+
+    json.data.vendors.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.vendor_id;
+      opt.textContent = v.name;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error('Could not load vendors:', err);
   }
 }
 
@@ -142,6 +165,7 @@ function populateHTML(products) {
 document.addEventListener('DOMContentLoaded', () => {
   // populate the category dropdown
   fetchCategories();
+  fetchVendors();
 
   // fetch all products initially
   fetchProducts();
