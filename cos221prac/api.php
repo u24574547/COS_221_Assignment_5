@@ -1,4 +1,9 @@
 <?php
+//Enabled php error reporting
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 spl_autoload_register(function ($class) {
     require __DIR__ . "/PA5/config/$class.php";
 });
@@ -93,36 +98,7 @@ class API
         $password = password_hash($data->password, PASSWORD_DEFAULT);
 
         if ($stmt->execute()) {
-            $stmtC = $this->conn->prepare("
-            INSERT INTO `customer`(`user_id`, `customer_id`, `num_purchases`, `total_spent`) 
-            VALUES (?,?,0,0)
-            ");
-            $stmtC->bind_param(
-                'ii',
-                $user_id,
-                $customer_id,
-            );
-
-            $user_id = -1;
-            $stmtU = $this->conn->prepare("
-            SELECT user_id FROM `user` WHERE 1 AND api_key = ?
-            ");
-            $stmtU->bind_param('s', $api_key);
-            if ($stmtU->execute()) {
-                $result = $stmtU->get_result();
-                if ($result->num_rows !== 0) {
-                    $row = $result->fetch_assoc();
-                    $user_id = $row['user_id'];
-                }
-            }
-
-            $customer_id = $user_id;
-
-            if ($user_id !== -1 && $stmtC->execute()) {
-                return $this->response(true, ["api_key" => $api_key]);
-            }
-
-            return $this->response(false, ["api_key" => $api_key, 'message' => 'added user but failed to add customer']);
+            return $this->response(true, ["api_key" => $api_key]);
         } else {
             return $this->response(false, $stmt->error, ["timestamp" => (int)(microtime(true) * 1000)]);
         }
@@ -150,41 +126,7 @@ class API
         }
     }
 
-    public function verifyAdmin($data) //accepts either email or api_key, returns json object with {success: true, data: {isAdmin: true/false}}
-    {
-        /*if (isset($data->email)) {
-            $stmt = $this->conn->prepare("SELECT user_id FROM user WHERE email = ?");
-            $stmt->bind_param("s", $data->email);
-        } else */if (isset($data->api_key)) {
-            $stmt = $this->conn->prepare("SELECT user_id FROM user WHERE api_key = ?");
-            $stmt->bind_param("s", $data->api_key);
-        }
-        else {
-            return $this->response(true, ['isAdmin' => false]);
-        }
-
-        if ($stmt->execute()) {
-            $result = $stmt->get_result();
-            if ($result->num_rows !== 0) {
-                $row = $result->fetch_assoc();
-
-                $stmtA = $this->conn->prepare("SELECT * FROM `admin` WHERE 1 AND user_id = ?"); //user is admin if user_id is in admin table
-                $stmtA->bind_param("s", $row['user_id']);
-                if ($stmtA->execute()) {
-                    $resultA = $stmtA->get_result();
-                    if ($resultA->num_rows !== 0) {
-                        return $this->response(true, ['isAdmin' => true]);
-                    } else {
-                        return $this->response(true, ['isAdmin' => false]);
-                    }
-                }
-            }
-            return $this->response(false, 'email not found');
-        } else {
-            return $this->response(false, $stmt->error);
-        }
-    }
-
+    //CHANGE THIS FUNCTION
     public function getProducts($data)
     {
         // Base query: include a LEFT JOIN so products without listings still appear
@@ -420,7 +362,7 @@ class API
         }
         return $this->response(true, ['categories' => $cats]);
     }
-
+    
     public function getVendors($data) {
         $sql = "
             SELECT DISTINCT v.vendor_id, v.name 
@@ -441,6 +383,7 @@ class API
 
         return $this->response(true, ['vendors' => $vendors]);
     }
+
 
 
         public function getReviews($data)
@@ -487,9 +430,6 @@ if (isset($data->type)) {
         case "login":
             echo $instance->login($data);
             break;
-        case "verifyAdmin":
-            echo $instance->verifyAdmin($data);
-            break;
         case "getProducts":
             echo $instance->getProducts($data);
             break;
@@ -502,11 +442,9 @@ if (isset($data->type)) {
         case 'getUser':
             echo $instance->getUser($data);
             break;
-
-        case 'getVendors':
+        case "getVendors":
             echo $instance->getVendors($data);
             break;
-
         case "getVendorListingsForProduct":
             echo $instance->getVendorListingsForProduct($data);
             break;
