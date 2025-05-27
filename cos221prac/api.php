@@ -115,7 +115,10 @@ class API
 
                 // Let password_verify handle the comparison properly
                 if (password_verify($data->password, $row['password'])) {
-                    return $this->response(true, ["api_key" => $row["api_key"]]);
+                    $adminParam = new stdClass();
+                    $adminParam->api_key= $row['api_key'];
+                    $admin = json_decode($this->verifyAdmin($adminParam));
+                    return $this->response(true, ["api_key" => $row["api_key"], "is_admin" => $admin->data->isAdmin]);
                 } else {
                     return $this->response(false, 'password incorrect');
                 }
@@ -126,7 +129,41 @@ class API
         }
     }
 
-    //CHANGE THIS FUNCTION
+    public function verifyAdmin($data) //accepts either email or api_key, returns json object with {success: true, data: {isAdmin: true/false}}
+    {
+        if (isset($data->email)) {
+            $stmt = $this->conn->prepare("SELECT user_id FROM user WHERE email = ?");
+            $stmt->bind_param("s", $data->email);
+        } else if (isset($data->api_key)) {
+            $stmt = $this->conn->prepare("SELECT user_id FROM user WHERE api_key = ?");
+            $stmt->bind_param("s", $data->api_key);
+        }
+        else {
+            return $this->response(true, ['isAdmin' => false]);
+        }
+
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            if ($result->num_rows !== 0) {
+                $row = $result->fetch_assoc();
+
+                $stmtA = $this->conn->prepare("SELECT * FROM `admin` WHERE 1 AND user_id = ?"); //user is admin if user_id is in admin table
+                $stmtA->bind_param("s", $row['user_id']);
+                if ($stmtA->execute()) {
+                    $resultA = $stmtA->get_result();
+                    if ($resultA->num_rows !== 0) {
+                        return $this->response(true, ['isAdmin' => true]);
+                    } else {
+                        return $this->response(true, ['isAdmin' => false]);
+                    }
+                }
+            }
+            return $this->response(false, 'email not found');
+        } else {
+            return $this->response(false, $stmt->error);
+        }
+    }
+
     public function getProducts($data)
     {
         // Base query: include a LEFT JOIN so products without listings still appear
@@ -196,7 +233,8 @@ class API
             return $this->response(false, 'Missing API key.');
         }
         if(isset($data->oldEmail)){
-            $admin = json_decode($this->verifyAdmin($data));
+            $lePara = json_decode(json_encode(['api_key' => $data->api_key]));
+            $admin = json_decode($this->verifyAdmin($lePara));
             if($admin->data->isAdmin){
                 $prepared = $this->conn->prepare("SELECT user_id FROM user WHERE email=?");
                 $prepared->bind_param('s', $data->oldEmail);
@@ -204,6 +242,48 @@ class API
                 $prepared->bind_result($data->user_id);
                 if(!$prepared->fetch()) return $this->response(false, 'Invalid old email');
                 $prepared->close();
+                if (isset($data->user_type)) {
+                    if(($data->user_type === 'user' || $data->user_type === 'admin')){
+                        //fetch old user type
+                        $userToEditsType = json_decode($this->verifyAdmin(json_decode(json_encode(["email"=>$data->oldEmail]))));
+                        if($userToEditsType->data->isAdmin && $data->user_type === 'user'){
+                            //make a user
+                            $stmtC = $this->conn->prepare('INSERT INTO `customer`(`user_id`, `customer_id`, `num_purchases`, `total_spent`) VALUES (?,?,0,0)');
+                            $stmtC->bind_param(
+                                'ii',
+                                $data->user_id,
+                                $data->user_id,
+                            );
+                            $stmtC->execute();
+
+                            $stmtD = $this->conn->prepare('DELETE FROM admin WHERE user_id=?');
+                            $stmtD->bind_param(
+                                'i',
+                                $data->user_id,
+                            );
+                            $stmtD->execute();
+                        }
+                        else if(!$userToEditsType->data->isAdmin && $data->user_type === 'admin'){
+                            //make an admin
+                            $stmtC = $this->conn->prepare('INSERT INTO `admin`(`user_id`, `admin_id`) VALUES (?,?)');
+                            $stmtC->bind_param(
+                                'ii',
+                                $data->user_id,
+                                $data->user_id,
+                            );
+                            $stmtC->execute();
+
+                            $stmtD = $this->conn->prepare('DELETE FROM customer WHERE user_id=?');
+                            $stmtD->bind_param(
+                                'i',
+                                $data->user_id,
+                            );
+                            $stmtD->execute();
+                        }
+
+                    }
+                    else return $this->response(false, 'user_type must be user or admin.');
+                }
             }
             else{
                 return $this->response(false, 'You do not have access to edit another users details or your API key is invalid.');
@@ -230,11 +310,6 @@ class API
         if (isset($data->lname)) {
             $setParts[] = "lname = ?";
             $params[] = $data->lname;
-            $types .= 's';
-        }
-        if (isset($data->password)) {
-            $setParts[] = "password = ?";
-            $params[] = $data->password;
             $types .= 's';
         }
         if (isset($data->email)) {
@@ -299,7 +374,7 @@ class API
         if ($result->num_rows !== 0) {
             $row = $result->fetch_assoc();
             $prepared->close();
-            return $this->response(false, $row);
+            return $this->response(true, $row);
         }
         else{
             return $this->response(false, 'Invalid API key.');

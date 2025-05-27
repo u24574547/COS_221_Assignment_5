@@ -20,16 +20,6 @@ $site_title = "The Query Kings PriceCompare";
           <li><a href="index.php?page=terms">Terms of Service</a></li>
         </ul>
       </div>
-      <div class="footer-column">
-        <h3>Categories</h3>
-        <ul>
-          <li><a href="index.php?page=category&id=electronics">Electronics</a></li>
-          <li><a href="index.php?page=category&id=fashion">Fashion</a></li>
-          <li><a href="index.php?page=category&id=home">Home & Kitchen</a></li>
-          <li><a href="index.php?page=category&id=beauty">Beauty & Personal Care</a></li>
-          <li><a href="index.php?page=category&id=toys">Toys & Games</a></li>
-        </ul>
-      </div>
     </div>
     <div class="copyright">
       <p>&copy; <?php echo date('Y'); ?> <?php echo $site_title; ?>. All Rights Reserved.</p>

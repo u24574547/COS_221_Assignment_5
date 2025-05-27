@@ -1,3 +1,5 @@
+var oldEmail = "";
+
 function element(id) {
   return document.getElementById(id);
 }
@@ -17,12 +19,13 @@ function message(id, text) {
 function ajax(data, callback) {
   var req = new XMLHttpRequest();
   req.onreadystatechange = function () {
-    if (req.readyState == 4 && req.status == 200) {
+    if (req.readyState === 4 && req.status === 200) {
       console.log(req.responseText);
 
       var json = JSON.parse(req.responseText);
       callback(json);
     }
+    else if(req.readyState === 4) console.log("Request Failed");
   };
 
   req.open("POST", "../api.php", true);
@@ -31,23 +34,55 @@ function ajax(data, callback) {
 }
 
 function editUserDetails() {
+  if(oldEmail==="") return;
   var fname = element('fname').value;
   var lname = element('lname').value;
   var email = element('email').value;
-  var password = element('password').value;
   var userType = element('userType').value;
-  console.log("User type: "+userType);
+  console.log(
+    "First Name:", fname,
+    "| Last Name:", lname,
+    "| Email:", email,
+    "| User Type:", userType
+  );
 
-  /*ajax({
-    "type": "register",
+
+  ajax({
+    "type": "updateUser",
     'fname': fname,
     'lname': lname,
     "email": email,
-    "password": password
+    "oldEmail": oldEmail,
+    "api_key": localStorage.getItem("api_key"),
+    "user_type": userType
   }, function (data) {
-    console.log(data.message);
+    if(data.success){
+      alert("Successfully updated user with email: "+oldEmail+"'s details.");
+    }
 
-  });*/
+  });
 }
 
-console.log('register loaded');
+window.onload = function () {
+  document.getElementById("search-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+    const query = formData.get("query");
+
+    ajax({
+      "api_key": localStorage.getItem("api_key"), "type": "getUser", "email": query
+    }, (response) => {
+      if (response.success) {
+        oldEmail = query;
+        const form = document.getElementById("updateUserForm");
+        form.elements["fname"].value = response.data.fname;
+        form.elements["lname"].value = response.data.lname;
+        form.elements["email"].value = response.data.email;
+        form.elements["userType"].value = response.data.type;
+        console.log("Updated details form.");
+      }
+      else alert("An error occurred during update: "+response.data);
+    });
+    console.log("Searching for:", query);
+  });
+}

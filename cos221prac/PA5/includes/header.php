@@ -22,31 +22,15 @@ $site_description = "The best deals on the Internet!";
         <h1><?php echo $site_title; ?></h1>
       </a>
     </div>
-    <div class="search-bar">
-      <form action="index.php?page=search" method="GET">
-        <input type="hidden" name="page" value="search">
-        <input type="text" name="query" placeholder="Search for products..." required>
-        <button type="submit"><i class="fas fa-search"></i></button>
-      </form>
-    </div>
     <nav>
       <ul>
         <li><a href="index.php" <?php echo ($page == 'home') ? 'class="active"' : ''; ?>>Home</a></li>
-        <li class="dropdown">
-          <a href="#" <?php echo ($page == 'category') ? 'class="active"' : ''; ?>>Categories <i class="fas fa-chevron-down"></i></a>
-          <div class="dropdown-content">
-            <a href="index.php?page=category&id=electronics">Electronics</a>
-            <a href="index.php?page=category&id=fashion">Fashion</a>
-            <a href="index.php?page=category&id=home">Home & Kitchen</a>
-            <a href="index.php?page=category&id=beauty">Beauty & Personal Care</a>
-            <a href="index.php?page=category&id=toys">Toys & Games</a>
-          </div>
-        </li>
+        <li><a href='index.php?page=viewall' <?php echo ($page == 'viewall') ? 'class="active"' : ''; ?>>Products</a></li>
         <li><a href="index.php?page=about" <?php echo ($page == 'about') ? 'class="active"' : ''; ?>>About</a></li>
         <li><a href="index.php?page=contact" <?php echo ($page == 'contact') ? 'class="active"' : ''; ?>>Contact</a></li>
-        <li><a href='index.php?page=admin' <?php echo ($page == 'admin') ? 'class="active"' : ''; ?>>Admin</a></li>
-        <li <?php echo ($logged_in===true) ? 'style="display:none;"' : 'error with logging in'; ?>><a href='index.php?page=register' <?php echo ($page == 'register') ? 'class="active"' : ''; ?>>Register</a>
-        <li <?php echo ($logged_in===true) ? 'style="display:none;"' : 'error with logging in'; ?>><a href='index.php?page=login' <?php echo ($page == 'login') ? 'class="active"' : ''; ?>>Login</a>
+        <li style="display:none;" id="admin-tab"><a href='index.php?page=admin' <?php echo ($page == 'admin') ? 'class="active"' : ''; ?>>Admin</a></li>
+        <li id='register-tab'><a href='index.php?page=register' <?php echo ($page == 'register') ? 'class="active"' : ''; ?>>Register</a>
+        <li id='login-tab'><a href='index.php?page=login' <?php echo ($page == 'login') ? 'class="active"' : ''; ?>>Login</a>
         </li>
       </ul>
     </nav>
