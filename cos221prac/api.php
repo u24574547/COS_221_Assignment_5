@@ -187,26 +187,37 @@ class API
 
     public function getProducts($data)
     {
-        // Start with a base query
-        $query = "SELECT * FROM products WHERE 1";
+        // Base query: include a LEFT JOIN so products without listings still appear
+        $query = "
+            SELECT 
+              p.*,
+              COUNT(l.listing_id) AS stores
+            FROM products p
+            LEFT JOIN listing l
+              ON l.product_id = p.product_id
+            WHERE 1
+        ";
 
-        // ——— Optional CATEGORY filter ———
+        // Category filter (unchanged)
         if (isset($data->category) && $data->category !== "") {
-            // escape to avoid injection
             $cat = $this->conn->real_escape_string($data->category);
-
             if (isset($data->fuzzy) && $data->fuzzy === true) {
-                $query .= " AND category REGEXP '" . $cat . "'";
+                $query .= " AND p.category REGEXP '{$cat}'";
             } else {
-                $query .= " AND category = '" . $cat . "'";
+                $query .= " AND p.category = '{$cat}'";
             }
         }
 
-        // ——— Other SEARCH properties ———
+        // Vendor filter (new, optional)
+        if (isset($data->vendor_id) && $data->vendor_id !== "all") {
+            $vendorId = (int)$data->vendor_id;
+            $query .= " AND l.vendor_id = {$vendorId}";
+        }
+
+        // Other search filters (unchanged)
         if (isset($data->search)) {
             $properties = get_object_vars($data->search);
             foreach ($properties as $name => $value) {
-                // skip price_min / price_max here (you could add them below if needed)
                 if ($name !== "price_min" && $name !== "price_max") {
                     $val = $this->conn->real_escape_string($value);
                     if (isset($data->fuzzy) && $data->fuzzy === true) {
@@ -218,14 +229,13 @@ class API
             }
         }
 
-        // ——— LIMIT ———
+        // Group and limit (unchanged except for grouping)
+        $query .= " GROUP BY p.product_id";
         if (isset($data->limit) && is_numeric($data->limit)) {
             $query .= " LIMIT " . (int)$data->limit;
         }
 
-        // Execute
         $result = $this->conn->query($query);
-
         if ($result) {
             $productsArr = [];
             while ($row = $result->fetch_assoc()) {
@@ -411,6 +421,27 @@ class API
         return $this->response(true, ['categories' => $cats]);
     }
 
+    public function getVendors($data) {
+        $sql = "
+            SELECT DISTINCT v.vendor_id, v.name 
+            FROM vendor v
+            JOIN listing l ON v.vendor_id = l.vendor_id
+            ORDER BY v.name
+        ";
+        $result = $this->conn->query($sql);
+
+        if (!$result) {
+            return $this->response(false, 'DB error: ' . $this->conn->error);
+        }
+
+        $vendors = [];
+        while ($row = $result->fetch_assoc()) {
+            $vendors[] = $row;
+        }
+
+        return $this->response(true, ['vendors' => $vendors]);
+    }
+
 
         public function getReviews($data)
     {
@@ -470,6 +501,10 @@ if (isset($data->type)) {
             break;
         case 'getUser':
             echo $instance->getUser($data);
+            break;
+
+        case 'getVendors':
+            echo $instance->getVendors($data);
             break;
 
         case "getVendorListingsForProduct":

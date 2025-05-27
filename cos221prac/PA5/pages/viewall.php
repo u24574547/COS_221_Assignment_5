@@ -9,6 +9,11 @@
       
       <!-- Add categories dynamically-->
       </select>
+      <label for="vendor-filter">Filter by Vendor:</label>
+      <select id="vendor-filter">
+        <option value="all">All</option>
+        <!-- Dynamically populated with JavaScript -->
+      </select>
       <button id="apply-filters">Apply</button>
     </div>
   </div>
